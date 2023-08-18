@@ -91,18 +91,7 @@ async def logout(request: Request, response: Response):
     I usually open a new tab/window to reset basic auth. We likely
     need a logout button to be handled somehow in javascript.
     """
-    response.delete_cookie("basic")
-    response.delete_cookie("bearer")
-    response.delete_cookie("access_token")
-    data = helpers.get_page("index.md")
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "data": data,
-        },
-    )
-
+    raise HTTPException(status_code=401, detail="Logged out successfully", headers={'WWW-Authenticate': 'Basic'})
 
 # View job detail (and log)
 @auth_views_router.get(
