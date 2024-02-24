@@ -23,6 +23,7 @@ def not_authenticated(detail="Incorrect user or token."):
 
 def alert_auth():
     print("🍓 Require auth: %s" % settings.require_auth)
+    print("🍓  Server mode: %s" % settings.flux_server_mode)
     print(
         "🍓   Secret key %s" % ("*" * len(settings.secret_key))
         if settings.secret_key
@@ -51,7 +52,11 @@ def check_auth(
         db, user_name=credentials.username, password=credentials.password
     )
     if not user:
-        raise HTTPException(status_code=401, detail="Incorrect email or password", headers={"WWW-Authenticate": "Basic"})
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
     elif not crud_user.is_active(user):
         raise HTTPException(status_code=400, detail="Inactive user")
     return credentials.username

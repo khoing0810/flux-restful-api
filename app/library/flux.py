@@ -33,8 +33,8 @@ def submit_job(handle, fluxjob, user):
     elif user and isinstance(user, str):
         print(f"User submitting job {user}")
 
-    # If we don't have auth enabled, submit in single-user mode
-    if not settings.require_auth:
+    # If we don't have auth enabled or request is for single-user mode
+    if not settings.require_auth or settings.flux_server_mode == "single-user":
         print("Submit in single-user mode.")
         return flux.job.submit_async(handle, fluxjob)
 
@@ -70,6 +70,29 @@ def submit_job(handle, fluxjob, user):
     print(f"Submit job {jobid}")
     job = FakeJob(jobid)
     return job
+
+
+def clean_submit_args(kwargs):
+    """
+    Clean up submit arguments
+    """
+    # Clean up Nones
+    cleaned = {}
+    for k, v in kwargs.items():
+        if k == "option_flags" and v is not None:
+            option_flags = {}
+            flags = v.split(",")
+            for flag in flags:
+                if "=" not in flag:
+                    print('Warning: invalid flag {flag} missing "="')
+                    continue
+                option, value = flag.split("=", 1)
+                option_flags[option] = value
+            v = option_flags
+
+        if v is not None:
+            cleaned[k] = v
+    return cleaned
 
 
 def validate_submit_kwargs(kwargs, envars=None, runtime=None):

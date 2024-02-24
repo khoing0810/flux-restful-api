@@ -30,8 +30,10 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install Dependencies (in case changes)
       run: pip install -r requirements.txt
+
     - name: Run tests
       run: |
+        pip freeze
         # Tests for the API with auth disabled
         flux start pytest -xs tests/test_api.py
 

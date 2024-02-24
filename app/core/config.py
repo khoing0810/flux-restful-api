@@ -4,8 +4,9 @@ import re
 import secrets
 import shlex
 import string
+from typing import Optional
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +86,16 @@ class Settings(BaseSettings):
 
     # If you change this, also change in alembic.ini
     db_file: str = "sqlite:///./flux-restful.db"
-    flux_user: str = os.environ.get("FLUX_USER")
-    flux_token: str = os.environ.get("FLUX_TOKEN")
+    flux_user: str = os.environ.get("FLUX_USER") or "fluxuser"
+    flux_token: Optional[str] = os.environ.get("FLUX_TOKEN")
+    flux_server_mode: Optional[str] = (
+        os.environ.get("FLUX_SERVER_MODE") or "single-user"
+    )
     secret_key: str = os.environ.get("FLUX_SECRET_KEY") or generate_secret_key()
+
+    # Validate the server mode provided.
+    if flux_server_mode not in ["single-user", "multi-user"]:
+        raise ValueError("FLUX_SERVER_MODE must be single-user or multi-user")
 
     # Expires in 10 hours
     access_token_expires_minutes: int = get_int_envar(
